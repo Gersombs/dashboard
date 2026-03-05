@@ -3,7 +3,7 @@
 Dashboard interactivo de criptomonedas construido para una prueba técnica de Front-End.
 
 ## Demo en vivo
-- URL: `https://dashboard-phi-dun-54.vercel.app/` 
+- URL: `https://dashboard-git-main-gersoms-projects-73141388.vercel.app/` 
 
 ## Capturas
 Estado inicial:
