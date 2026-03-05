@@ -50,13 +50,13 @@ function CustomTooltip({
         <span className="text-slate-400 text-xs">({item.symbol})</span>
       </p>
       <p className="text-xs text-slate-300">
-        Volume:{' '}
+        Volumen:{' '}
         <span className="text-white font-medium">
           {formatCurrency(item.volume, currency, true)}
         </span>
       </p>
       <p className="text-xs text-slate-300">
-        Share:{' '}
+        Participacion:{' '}
         <span className="text-white font-medium">
           {item.percentage.toFixed(1)}%
         </span>
@@ -99,7 +99,7 @@ export default function VolumeDonutChart({
       <div
         className="rounded-xl bg-[#1A1D2E]/80 backdrop-blur-sm border border-white/5 p-5"
         role="status"
-        aria-label="Loading volume chart"
+        aria-label="Cargando grafica de volumen"
       >
         <Skeleton className="h-5 w-44 bg-slate-700 mb-4" />
         <div className="flex justify-center">
@@ -111,8 +111,12 @@ export default function VolumeDonutChart({
 
   if (!coins || coins.length === 0) {
     return (
-      <div className="rounded-xl bg-[#1A1D2E]/80 border border-white/5 p-5 flex items-center justify-center h-[380px]">
-        <p className="text-slate-400">No volume data available</p>
+      <div
+        className="rounded-xl bg-[#1A1D2E]/80 border border-white/5 p-5 flex items-center justify-center h-[380px]"
+        role="status"
+        aria-live="polite"
+      >
+        <p className="text-slate-400">No hay datos de volumen disponibles</p>
       </div>
     );
   }
@@ -126,28 +130,32 @@ export default function VolumeDonutChart({
     percentage: (coin.total_volume / totalVolume) * 100,
   }));
 
-  // Add "Others" if there are more coins
   if (coins.length > 8) {
     const othersVolume = coins
       .slice(8)
       .reduce((sum, coin) => sum + coin.total_volume, 0);
     chartData.push({
-      name: 'Others',
-      symbol: 'OTHER',
+      name: 'Otros',
+      symbol: 'OTROS',
       volume: othersVolume,
       percentage: (othersVolume / totalVolume) * 100,
     });
   }
 
+  const summaryText = `Grafica dona de distribución de volumen con ${chartData.length} segmentos. Segmento mas grande: ${chartData[0]?.name ?? 'N/D'}.`;
+
   return (
-    <div
+    <figure
       className="rounded-xl bg-[#1A1D2E]/80 backdrop-blur-sm border border-white/5 p-5 transition-all hover:border-indigo-500/20"
-      role="figure"
-      aria-label="Trading volume distribution donut chart"
+      aria-labelledby="volume-title"
+      aria-describedby="volume-summary"
     >
-      <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+      <h3
+        id="volume-title"
+        className="text-lg font-semibold text-white mb-4 flex items-center gap-2"
+      >
         <span className="w-1 h-5 bg-amber-400 rounded-full" />
-        Volume Distribution
+        Distribución de Volumen
       </h3>
       <ResponsiveContainer width="100%" height={300}>
         <PieChart>
@@ -174,6 +182,9 @@ export default function VolumeDonutChart({
           <Legend content={renderLegend} />
         </PieChart>
       </ResponsiveContainer>
-    </div>
+      <figcaption id="volume-summary" className="sr-only">
+        {summaryText}
+      </figcaption>
+    </figure>
   );
 }

@@ -52,13 +52,13 @@ function CustomTooltip({
         <span className="text-slate-400 text-xs">({item.symbol})</span>
       </p>
       <p className="text-xs text-slate-300">
-        Market Cap:{' '}
+        Capitalizacion:{' '}
         <span className="text-white font-medium">
           {formatCurrency(item.market_cap, currency, true)}
         </span>
       </p>
       <p className="text-xs text-slate-300">
-        Volume:{' '}
+        Volumen:{' '}
         <span className="text-white font-medium">
           {formatCurrency(item.volume, currency, true)}
         </span>
@@ -77,7 +77,7 @@ export default function MarketCapBarChart({
       <div
         className="rounded-xl bg-[#1A1D2E]/80 backdrop-blur-sm border border-white/5 p-5"
         role="status"
-        aria-label="Loading market cap chart"
+        aria-label="Cargando grafica de capitalizacion"
       >
         <Skeleton className="h-5 w-48 bg-slate-700 mb-4" />
         <Skeleton className="h-[300px] w-full bg-slate-700/50 rounded-lg" />
@@ -87,8 +87,12 @@ export default function MarketCapBarChart({
 
   if (!coins || coins.length === 0) {
     return (
-      <div className="rounded-xl bg-[#1A1D2E]/80 border border-white/5 p-5 flex items-center justify-center h-[380px]">
-        <p className="text-slate-400">No market data available</p>
+      <div
+        className="rounded-xl bg-[#1A1D2E]/80 border border-white/5 p-5 flex items-center justify-center h-[380px]"
+        role="status"
+        aria-live="polite"
+      >
+        <p className="text-slate-400">No hay datos de mercado disponibles</p>
       </div>
     );
   }
@@ -101,15 +105,20 @@ export default function MarketCapBarChart({
     displayName: coin.symbol.toUpperCase(),
   }));
 
+  const summaryText = `Comparacion de capitalizacion para ${chartData.length} monedas. Simbolo lider: ${chartData[0]?.symbol ?? 'N/D'}.`;
+
   return (
-    <div
+    <figure
       className="rounded-xl bg-[#1A1D2E]/80 backdrop-blur-sm border border-white/5 p-5 transition-all hover:border-indigo-500/20"
-      role="figure"
-      aria-label="Market capitalization bar chart"
+      aria-labelledby="market-cap-title"
+      aria-describedby="market-cap-summary"
     >
-      <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+      <h3
+        id="market-cap-title"
+        className="text-lg font-semibold text-white mb-4 flex items-center gap-2"
+      >
         <span className="w-1 h-5 bg-cyan-400 rounded-full" />
-        Market Cap Comparison
+        Comparacion de capitalizacion
       </h3>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart
@@ -133,12 +142,12 @@ export default function MarketCapBarChart({
           <Tooltip content={<CustomTooltip currency={currency} />} />
           <Legend
             formatter={() => (
-              <span className="text-slate-300 text-sm">Market Cap</span>
+              <span className="text-slate-300 text-sm">Capitalizacion</span>
             )}
           />
           <Bar
             dataKey="market_cap"
-            name="Market Cap"
+            name="Capitalizacion"
             radius={[4, 4, 0, 0]}
             maxBarSize={50}
           >
@@ -152,6 +161,9 @@ export default function MarketCapBarChart({
           </Bar>
         </BarChart>
       </ResponsiveContainer>
-    </div>
+      <figcaption id="market-cap-summary" className="sr-only">
+        {summaryText}
+      </figcaption>
+    </figure>
   );
 }

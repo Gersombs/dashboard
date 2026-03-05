@@ -43,6 +43,7 @@ Desktop.ini
 .sass-cache/
 .vite_opt_cache/
 test-results/
+playwright-report/
 *.coverage
 *.lcov
 *.user

@@ -71,7 +71,7 @@ export default function PriceLineChart({
       <div
         className="rounded-xl bg-[#1A1D2E]/80 backdrop-blur-sm border border-white/5 p-5"
         role="status"
-        aria-label="Loading price chart"
+        aria-label="Cargando grafica de precio"
       >
         <Skeleton className="h-5 w-40 bg-slate-700 mb-4" />
         <Skeleton className="h-[300px] w-full bg-slate-700/50 rounded-lg" />
@@ -82,8 +82,12 @@ export default function PriceLineChart({
   const coinIds = Object.keys(data);
   if (coinIds.length === 0) {
     return (
-      <div className="rounded-xl bg-[#1A1D2E]/80 border border-white/5 p-5 flex items-center justify-center h-[380px]">
-        <p className="text-slate-400">No price data available</p>
+      <div
+        className="rounded-xl bg-[#1A1D2E]/80 border border-white/5 p-5 flex items-center justify-center h-[380px]"
+        role="status"
+        aria-live="polite"
+      >
+        <p className="text-slate-400">No hay datos de precio disponibles</p>
       </div>
     );
   }
@@ -104,15 +108,20 @@ export default function PriceLineChart({
     return entry;
   });
 
+  const summaryText = `Grafica de historial de precio con ${coinIds.length} series y ${mergedData.length} puntos por serie.`;
+
   return (
-    <div
+    <figure
       className="rounded-xl bg-[#1A1D2E]/80 backdrop-blur-sm border border-white/5 p-5 transition-all hover:border-indigo-500/20"
-      role="figure"
-      aria-label="Price history line chart"
+      aria-labelledby="price-history-title"
+      aria-describedby="price-history-summary"
     >
-      <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+      <h3
+        id="price-history-title"
+        className="text-lg font-semibold text-white mb-4 flex items-center gap-2"
+      >
         <span className="w-1 h-5 bg-indigo-500 rounded-full" />
-        Price History
+        Historial de Precio
       </h3>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart
@@ -134,9 +143,7 @@ export default function PriceLineChart({
             tickFormatter={(value) => formatCurrency(value, currency, true)}
             width={80}
           />
-          <Tooltip
-            content={<CustomTooltip currency={currency} />}
-          />
+          <Tooltip content={<CustomTooltip currency={currency} />} />
           <Legend
             wrapperStyle={{ paddingTop: '10px' }}
             formatter={(value: string) => (
@@ -164,6 +171,9 @@ export default function PriceLineChart({
           ))}
         </LineChart>
       </ResponsiveContainer>
-    </div>
+      <figcaption id="price-history-summary" className="sr-only">
+        {summaryText}
+      </figcaption>
+    </figure>
   );
 }

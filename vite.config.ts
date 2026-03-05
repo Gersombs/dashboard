@@ -18,15 +18,18 @@ export default defineConfig(({ mode }) => ({
     },
   },
   server: {
-    host: '0.0.0.0', 
-    port: parseInt(process.env.VITE_PORT || '3000'),
-    proxy: {
-      '/api': {
-        target: `http://localhost:8000`,
-        changeOrigin: true,
-      },
+  host: '0.0.0.0',
+  port: parseInt(process.env.VITE_PORT || '3000'),
+  watch: { usePolling: true, interval: 600 },
+},
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: [path.resolve(__dirname, 'src/test/setup.ts')],
+    exclude: ['e2e/**', 'node_modules/**', 'dist/**'],
+    coverage: {
+      reporter: ['text', 'html'],
     },
-    watch: { usePolling: true, interval: 600 },
   },
   build: {
     rollupOptions: {

@@ -8,15 +8,15 @@ export default function AuthErrorPage() {
   const [countdown, setCountdown] = useState(3);
   const errorMessage =
     searchParams.get('msg') ||
-    'Sorry, your authentication information is invalid or has expired';
+    'Lo sentimos, tu informacion de autenticacion es invalida o ha expirado.';
 
   useEffect(() => {
-    // Countdown logic
+    // Logica del contador.
     const timer = setInterval(() => {
       setCountdown(prev => {
         if (prev <= 1) {
           clearInterval(timer);
-          // Redirect to home page
+          // Redirigir al inicio.
           window.location.href = '/';
           return 0;
         }
@@ -24,7 +24,7 @@ export default function AuthErrorPage() {
       });
     }, 1000);
 
-    // Clean up timer
+    // Limpiar el timer.
     return () => clearInterval(timer);
   }, []);
 
@@ -36,7 +36,7 @@ export default function AuthErrorPage() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-blue-50 p-6 text-center">
       <div className="space-y-6 max-w-md">
         <div className="space-y-4">
-          {/* Error icon */}
+          {/* Icono de error */}
           <div className="flex justify-center">
             <div className="relative">
               <div className="absolute inset-0 bg-red-500/20 blur-xl rounded-full"></div>
@@ -47,36 +47,36 @@ export default function AuthErrorPage() {
             </div>
           </div>
 
-          {/* Error title */}
+          {/* Titulo de error */}
           <h1 className="text-2xl font-bold text-gray-800">
-            Authentication Error
+            Error de autenticacion
           </h1>
 
-          {/* Error description */}
+          {/* Descripcion de error */}
           <p className="text-base text-muted-foreground">{errorMessage}</p>
 
-          {/* Countdown提示 */}
+          {/* Cuenta regresiva */}
           <div className="pt-2">
             <p className="text-sm text-gray-500">
               {countdown > 0 ? (
                 <>
-                  Will automatically return to the home page in{' '}
+                  Volveras automaticamente al inicio en{' '}
                   <span className="text-blue-600 font-semibold text-base">
                     {countdown}
                   </span>{' '}
-                  seconds
+                  segundos
                 </>
               ) : (
-                'Redirecting...'
+                'Redirigiendo...'
               )}
             </p>
           </div>
         </div>
 
-        {/* Return to home button */}
+        {/* Boton para volver al inicio */}
         <div className="flex justify-center pt-2">
           <Button onClick={handleReturnHome} className="px-6">
-            Return to Home
+            Volver al inicio
           </Button>
         </div>
       </div>

@@ -96,7 +96,7 @@ export default function StatCards({
     return (
       <div
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
-        aria-label="Loading statistics"
+        aria-label="Cargando estadisticas"
         role="status"
       >
         {Array.from({ length: 4 }).map((_, i) => (
@@ -109,31 +109,31 @@ export default function StatCards({
   return (
     <div
       className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
-      aria-label="Cryptocurrency statistics"
+      aria-label="Estadísticas de criptomoneda"
     >
       <StatCardItem
-        title="Current Price"
+        title="Precio actual"
         value={formatCurrency(coin.current_price, currency)}
-        subtitle={`Rank #${coin.market_cap_rank}`}
+        subtitle={`Puesto #${coin.market_cap_rank}`}
         icon={<DollarSign className="w-5 h-5" aria-hidden="true" />}
         changeValue={coin.price_change_percentage_24h}
       />
       <StatCardItem
-        title="Market Cap"
+        title="Capitalización"
         value={formatCurrency(coin.market_cap, currency, true)}
-        subtitle="Total market capitalization"
+        subtitle="Capitalización total"
         icon={<BarChart3 className="w-5 h-5" aria-hidden="true" />}
       />
       <StatCardItem
-        title="24h Volume"
+        title="Volumen 24h"
         value={formatCurrency(coin.total_volume, currency, true)}
-        subtitle="Trading volume in 24 hours"
+        subtitle="Volumen de trading en 24 horas"
         icon={<Activity className="w-5 h-5" aria-hidden="true" />}
       />
       <StatCardItem
-        title="Circulating Supply"
+        title="Oferta circulante"
         value={`${formatNumber(coin.circulating_supply)} ${coin.symbol.toUpperCase()}`}
-        subtitle={`ATH: ${formatCurrency(coin.ath, currency)}`}
+        subtitle={`áximo histórico: ${formatCurrency(coin.ath, currency)}`}
         icon={<Coins className="w-5 h-5" aria-hidden="true" />}
       />
     </div>

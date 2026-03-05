@@ -1,50 +1,132 @@
-/**
- * CoinGecko API service layer.
- * Handles all API requests with error handling, rate limiting awareness,
- * and data transformation for the crypto dashboard.
- *
- * API: CoinGecko Free API (no API key required)
- * Base URL: https://api.coingecko.com/api/v3
- * Rate Limit: ~10-30 calls/minute on free tier
- */
-
 const BASE_URL = 'https://api.coingecko.com/api/v3';
 
-/** Cache to reduce API calls */
-const cache = new Map<string, { data: unknown; timestamp: number }>();
-const CACHE_DURATION = 60_000; // 1 minute cache
+function toPositiveInt(value: string | undefined, fallback: number): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
+}
 
-/**
- * Generic fetch wrapper with error handling and caching
- */
+const cache = new Map<string, { data: unknown; timestamp: number }>();
+const CACHE_DURATION = toPositiveInt(import.meta.env.VITE_API_CACHE_MS, 180_000);
+const REQUEST_TIMEOUT_MS = toPositiveInt(
+  import.meta.env.VITE_API_TIMEOUT_MS,
+  20_000
+);
+const MAX_RETRIES = Math.min(
+  toPositiveInt(import.meta.env.VITE_API_MAX_RETRIES, 3),
+  6
+);
+const BACKOFF_BASE_MS = toPositiveInt(
+  import.meta.env.VITE_API_BACKOFF_BASE_MS,
+  600
+);
+const BACKOFF_JITTER_MS = toPositiveInt(
+  import.meta.env.VITE_API_BACKOFF_JITTER_MS,
+  300
+);
+const RETRYABLE_STATUS_CODES = new Set([408, 429, 500, 502, 503, 504]);
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function getBackoffDelay(attempt: number): number {
+  return (
+    BACKOFF_BASE_MS * 2 ** attempt + Math.floor(Math.random() * BACKOFF_JITTER_MS)
+  );
+}
+
+function isAbortError(error: unknown): boolean {
+  return error instanceof DOMException && error.name === 'AbortError';
+}
+
+function isNetworkError(error: unknown): boolean {
+  return error instanceof TypeError;
+}
+
+async function fetchWithRetry(url: string): Promise<Response> {
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+    try {
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (response.ok) return response;
+
+      const shouldRetry =
+        RETRYABLE_STATUS_CODES.has(response.status) && attempt < MAX_RETRIES;
+      if (!shouldRetry) return response;
+    } catch (error) {
+      clearTimeout(timeoutId);
+
+      const shouldRetry =
+        (isAbortError(error) || isNetworkError(error)) &&
+        attempt < MAX_RETRIES;
+      if (!shouldRetry) throw error;
+    }
+
+    await sleep(getBackoffDelay(attempt));
+  }
+
+  throw new Error('Fallo la solicitud despues de varios reintentos.');
+}
+
 async function fetchWithCache<T>(url: string): Promise<T> {
   const cached = cache.get(url);
   if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
     return cached.data as T;
   }
 
-  const response = await fetch(url);
+  let response: Response;
+  try {
+    response = await fetchWithRetry(url);
+  } catch (error) {
+    if (isAbortError(error)) {
+      throw new Error(
+        'La solicitud excedio el tiempo limite. La API gratis puede estar saturada. Intenta de nuevo en unos segundos.'
+      );
+    }
+
+    if (isNetworkError(error)) {
+      throw new Error(
+        'Error de red: no fue posible conectar con CoinGecko. Verifica tu conexion e intenta de nuevo.'
+      );
+    }
+
+    throw new Error('Error de red inesperado al cargar datos.');
+  }
 
   if (!response.ok) {
     if (response.status === 429) {
       throw new Error(
-        'Rate limit exceeded. Please wait a moment and try again.'
+        'Limite de solicitudes excedido. Espera un momento e intenta de nuevo.'
+      );
+    }
+    if (response.status === 408 || response.status === 504) {
+      throw new Error(
+        'CoinGecko esta respondiendo muy lento. Intenta de nuevo en unos segundos.'
       );
     }
     if (response.status >= 500) {
       throw new Error(
-        'CoinGecko server is temporarily unavailable. Please try again later.'
+        'El servidor de CoinGecko no esta disponible temporalmente. Intenta mas tarde.'
       );
     }
-    throw new Error(`Failed to fetch data (HTTP ${response.status})`);
+    throw new Error(`No se pudieron obtener datos (HTTP ${response.status})`);
   }
 
-  const data = await response.json();
+  let data: unknown;
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error('Formato de respuesta inesperado de la API de CoinGecko.');
+  }
+
   cache.set(url, { data, timestamp: Date.now() });
   return data as T;
 }
 
-/** Market data for a single coin */
 export interface CoinMarketData {
   id: string;
   symbol: string;
@@ -64,7 +146,6 @@ export interface CoinMarketData {
   ath_change_percentage: number;
 }
 
-/** Price history data point */
 export interface PriceHistoryPoint {
   timestamp: number;
   price: number;
@@ -78,11 +159,6 @@ interface MarketChartResponse {
   total_volumes: [number, number][];
 }
 
-/**
- * Fetch top coins by market cap
- * @param currency - vs_currency (usd, eur, gbp)
- * @param perPage - Number of coins to fetch (max 250)
- */
 export async function fetchTopCoins(
   currency: string = 'usd',
   perPage: number = 10
@@ -91,12 +167,6 @@ export async function fetchTopCoins(
   return fetchWithCache<CoinMarketData[]>(url);
 }
 
-/**
- * Fetch price history for a specific coin
- * @param coinId - CoinGecko coin ID
- * @param currency - vs_currency
- * @param days - Number of days of history
- */
 export async function fetchPriceHistory(
   coinId: string,
   currency: string = 'usd',
@@ -108,19 +178,13 @@ export async function fetchPriceHistory(
   return data.prices.map(([timestamp, price]) => ({
     timestamp,
     price,
-    date: new Date(timestamp).toLocaleDateString('en-US', {
+    date: new Date(timestamp).toLocaleDateString('es-MX', {
       month: 'short',
       day: 'numeric',
     }),
   }));
 }
 
-/**
- * Fetch price history for multiple coins (for comparison)
- * @param coinIds - Array of CoinGecko coin IDs
- * @param currency - vs_currency
- * @param days - Number of days
- */
 export async function fetchMultiplePriceHistory(
   coinIds: string[],
   currency: string = 'usd',
@@ -128,26 +192,25 @@ export async function fetchMultiplePriceHistory(
 ): Promise<Record<string, PriceHistoryPoint[]>> {
   const results: Record<string, PriceHistoryPoint[]> = {};
 
-  // Fetch sequentially to avoid rate limiting
-  for (const coinId of coinIds) {
+  // Proteccion para limite de solicitudes:
+  const safeCoinIds = coinIds.length > 5 ? coinIds.slice(0, 5) : coinIds;
+
+  for (const coinId of safeCoinIds) {
     try {
       results[coinId] = await fetchPriceHistory(coinId, currency, days);
     } catch (error) {
-      console.error(`Failed to fetch history for ${coinId}:`, error);
+      console.error(`No se pudo cargar el historial de ${coinId}:`, error);
       results[coinId] = [];
     }
-    // Small delay between requests to respect rate limits
-    if (coinIds.indexOf(coinId) < coinIds.length - 1) {
-      await new Promise((resolve) => setTimeout(resolve, 300));
+
+    if (safeCoinIds.indexOf(coinId) < safeCoinIds.length - 1) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
   }
 
   return results;
 }
 
-/**
- * Clear the API cache (useful when user changes filters)
- */
 export function clearCache(): void {
   cache.clear();
 }

@@ -1,16 +1,3 @@
-/**
- * Main Dashboard Page - CoinGecko Crypto Dashboard
- *
- * This is the primary page that orchestrates all dashboard components:
- * - Filters for user interaction
- * - StatCards for key metrics
- * - PriceLineChart for price history
- * - MarketCapBarChart for market cap comparison
- * - VolumeDonutChart for volume distribution
- *
- * State management is handled via React hooks with useQuery for data fetching.
- */
-
 import { useState, useMemo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AlertCircle, RefreshCw, TrendingUp } from 'lucide-react';
@@ -29,10 +16,10 @@ import {
   type PriceHistoryPoint,
 } from '@/lib/api';
 
-const HERO_BG = 'https://mgx-backend-cdn.metadl.com/generate/images/1003084/2026-03-04/421086a8-a195-4af0-903c-3b9134fb5656.png';
+const HERO_BG =
+  'https://mgx-backend-cdn.metadl.com/generate/images/1003084/2026-03-04/421086a8-a195-4af0-903c-3b9134fb5656.png';
 
 export default function DashboardPage() {
-  // Filter state
   const [filters, setFilters] = useState<FilterState>({
     selectedCoin: 'bitcoin',
     dateRange: '30',
@@ -40,24 +27,28 @@ export default function DashboardPage() {
     topN: 10,
   });
 
-  // Fetch top coins by market cap
   const {
     data: topCoins,
     isLoading: isLoadingCoins,
+    isFetching: isFetchingCoins,
     error: coinsError,
     refetch: refetchCoins,
+    dataUpdatedAt: topCoinsUpdatedAt,
   } = useQuery<CoinMarketData[]>({
     queryKey: ['topCoins', filters.currency, filters.topN],
     queryFn: () => fetchTopCoins(filters.currency, filters.topN),
-    staleTime: 60_000,
-    retry: 2,
+    staleTime: 180_000,
+    refetchOnWindowFocus: false,
+    retry: false,
   });
 
-  // Fetch price history for selected coin
   const {
     data: priceHistory,
     isLoading: isLoadingHistory,
+    isFetching: isFetchingHistory,
     error: historyError,
+    refetch: refetchHistory,
+    dataUpdatedAt: historyUpdatedAt,
   } = useQuery<PriceHistoryPoint[]>({
     queryKey: [
       'priceHistory',
@@ -69,41 +60,66 @@ export default function DashboardPage() {
       fetchPriceHistory(
         filters.selectedCoin,
         filters.currency,
-        parseInt(filters.dateRange)
+        parseInt(filters.dateRange, 10)
       ),
-    staleTime: 60_000,
-    retry: 2,
+    staleTime: 180_000,
+    refetchOnWindowFocus: false,
+    retry: false,
   });
 
-  // Find the selected coin data from top coins
   const selectedCoinData = useMemo(() => {
     if (!topCoins) return null;
     return topCoins.find((c) => c.id === filters.selectedCoin) || null;
   }, [topCoins, filters.selectedCoin]);
 
-  // Format price history for chart
   const priceChartData = useMemo(() => {
     if (!priceHistory) return {};
     return { [filters.selectedCoin]: priceHistory };
   }, [priceHistory, filters.selectedCoin]);
 
-  // Handle filter changes
   const handleFilterChange = useCallback((newFilters: FilterState) => {
     setFilters(newFilters);
   }, []);
 
-  // Handle refresh
-  const handleRefresh = useCallback(() => {
+  const handleRefresh = useCallback(async () => {
     clearCache();
-    refetchCoins();
-  }, [refetchCoins]);
+    await Promise.all([refetchCoins(), refetchHistory()]);
+  }, [refetchCoins, refetchHistory]);
 
-  // Combined error state
   const error = coinsError || historyError;
+  const errorMessage =
+    error instanceof Error
+      ? error.message
+      : 'Error inesperado al cargar el dashboard.';
+  const isRateLimitError = /rate limit|limite de solicitudes|429/i.test(
+    errorMessage
+  );
+  const isSaturationError =
+    /tiempo limite|timeout|error de red|503|504|no esta disponible|respondiendo muy lento|saturad/i.test(
+      errorMessage
+    );
+
+  const isRefreshing = isFetchingCoins || isFetchingHistory;
+  const hasLoadedData = Boolean(topCoins || priceHistory);
+  const lastUpdatedTimestamp = Math.max(topCoinsUpdatedAt, historyUpdatedAt);
+  const lastUpdatedLabel =
+    hasLoadedData && lastUpdatedTimestamp > 0
+      ? new Date(lastUpdatedTimestamp).toLocaleTimeString('es-MX', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        })
+      : null;
 
   return (
     <div className="min-h-screen bg-[#0F1117] text-white">
-      {/* Hero Header */}
+      <a
+        href="#dashboard-main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-indigo-600 focus:px-3 focus:py-2 focus:text-white"
+      >
+        Ir al contenido principal
+      </a>
+
       <header
         className="relative overflow-hidden border-b border-white/5"
         role="banner"
@@ -128,10 +144,10 @@ export default function DashboardPage() {
               </div>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
-                  Crypto Dashboard
+                  Dashboard Cripto
                 </h1>
                 <p className="text-sm text-slate-400 mt-0.5">
-                  Real-time cryptocurrency market data powered by CoinGecko
+                  Prueba técnica - GersomBS
                 </p>
               </div>
             </div>
@@ -139,23 +155,39 @@ export default function DashboardPage() {
               variant="outline"
               size="sm"
               onClick={handleRefresh}
+              disabled={isRefreshing}
               className="bg-transparent border-[#2D3154] text-slate-300 hover:bg-[#242842] hover:text-white"
-              aria-label="Refresh dashboard data"
+              aria-label="Actualizar datos del dashboard"
             >
-              <RefreshCw className="w-4 h-4 mr-2" aria-hidden="true" />
-              Refresh
+              <RefreshCw
+                className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`}
+                aria-hidden="true"
+              />
+              Actualizar
             </Button>
           </div>
+
+          <p
+            className="mt-3 text-xs text-slate-400"
+            role="status"
+            aria-live="polite"
+          >
+            {isRefreshing
+              ? 'Actualizando datos de mercado...'
+              : lastUpdatedLabel
+              ? `Ultima actualizacion: ${lastUpdatedLabel}`
+              : 'Cargando datos iniciales...'}
+          </p>
         </div>
       </header>
 
-      {/* Main Content */}
       <main
+        id="dashboard-main"
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6"
         role="main"
-        aria-label="Cryptocurrency dashboard"
+        aria-label="Dashboard de criptomonedas"
+        aria-busy={isLoadingCoins || isLoadingHistory}
       >
-        {/* Error Alert */}
         {error && (
           <Alert
             variant="destructive"
@@ -163,22 +195,28 @@ export default function DashboardPage() {
             role="alert"
           >
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error loading data</AlertTitle>
+            <AlertTitle>
+              {isRateLimitError
+                ? 'Limite de API alcanzado'
+                : isSaturationError
+                  ? 'Servicio saturado'
+                  : 'Error al cargar datos'}
+            </AlertTitle>
             <AlertDescription>
-              {error instanceof Error
-                ? error.message
-                : 'An unexpected error occurred. Please try again.'}
+              {isRateLimitError
+                ? 'CoinGecko (plan gratis) permite pocas consultas por minuto. Espera unos segundos y presiona Actualizar.'
+                : isSaturationError
+                  ? 'La API gratis esta saturada o lenta. Ya aplicamos reintentos automaticos con backoff; intenta de nuevo en unos segundos.'
+                  : errorMessage}
             </AlertDescription>
           </Alert>
         )}
 
-        {/* Filters */}
-        <section aria-label="Dashboard filters">
+        <section aria-label="Filtros del dashboard">
           <Filters filters={filters} onFilterChange={handleFilterChange} />
         </section>
 
-        {/* Stat Cards */}
-        <section aria-label="Key statistics">
+        <section aria-label="Estadisticas principales">
           <StatCards
             coin={selectedCoinData}
             currency={filters.currency}
@@ -186,10 +224,8 @@ export default function DashboardPage() {
           />
         </section>
 
-        {/* Charts Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Price Line Chart - Full width on mobile, half on desktop */}
-          <section className="lg:col-span-2" aria-label="Price history chart">
+          <section className="lg:col-span-2" aria-label="Grafica de historial de precio">
             <PriceLineChart
               data={priceChartData}
               currency={filters.currency}
@@ -197,8 +233,7 @@ export default function DashboardPage() {
             />
           </section>
 
-          {/* Market Cap Bar Chart */}
-          <section aria-label="Market capitalization comparison">
+          <section aria-label="Comparacion de capitalizacion de mercado">
             <MarketCapBarChart
               coins={topCoins || []}
               currency={filters.currency}
@@ -206,8 +241,7 @@ export default function DashboardPage() {
             />
           </section>
 
-          {/* Volume Donut Chart */}
-          <section aria-label="Trading volume distribution">
+          <section aria-label="Distribucion de volumen de trading">
             <VolumeDonutChart
               coins={topCoins || []}
               currency={filters.currency}
@@ -216,13 +250,12 @@ export default function DashboardPage() {
           </section>
         </div>
 
-        {/* Footer */}
         <footer
           className="text-center py-6 border-t border-white/5"
           role="contentinfo"
         >
           <p className="text-xs text-slate-500">
-            Data provided by{' '}
+            Datos provistos por{' '}
             <a
               href="https://www.coingecko.com/"
               target="_blank"
@@ -231,7 +264,7 @@ export default function DashboardPage() {
             >
               CoinGecko API
             </a>{' '}
-            · Dashboard built with React, Recharts & shadcn/ui
+            | Dashboard creada con React, Recharts y shadcn/ui por GersomBS
           </p>
         </footer>
       </main>

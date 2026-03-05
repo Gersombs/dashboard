@@ -1,165 +1,168 @@
-🚀 Crypto Dashboard - Datos de Mercado en Tiempo Real
+# Dashboard cripto (CoinGecko)
 
-Un dashboard interactivo de criptomonedas que visualiza datos de mercado en tiempo real utilizando la API de CoinGecko. Construido con React, TypeScript, Recharts y shadcn/ui.
+Dashboard interactivo de criptomonedas construido para una prueba técnica de Front-End.
 
-📸 Funcionalidades
-📊 Visualización de Datos
+## Demo en vivo
+- URL: `https://dashboard-phi-dun-54.vercel.app/` 
 
-Gráfica de Línea (Historial de Precio): Seguimiento de tendencias en periodos de 7, 30, 90 días o 1 año.
+## Capturas
+Estado inicial:
 
-Gráfica de Barras (Capitalización de Mercado): Comparación entre las principales criptomonedas.
+![Estado inicial del dashboard](docs/screenshots/01-initial-state.png)
 
-Gráfica Donut (Distribución de Volumen): Visualización de la distribución del volumen de trading.
+Despues de aplicar filtros:
 
-🎛 Filtros Interactivos
+![Dashboard despues de filtros](docs/screenshots/02-after-filters.png)
 
-Selector de Criptomoneda: BTC, ETH, SOL y otras 10 populares.
+Vista movil:
 
-Periodo de Tiempo: 7 días, 30 días, 90 días o 1 año.
+![Vista movil del dashboard](docs/screenshots/03-mobile.png)
 
-Moneda: USD, EUR o GBP.
+## Cobertura de requisitos
+1. Visualizacion de datos
+- API publica: CoinGecko (`/coins/markets`, `/coins/{id}/market_chart`)
+- Graficas: linea, barras y dona (Recharts)
 
-Top N Coins: Mostrar top 5, 10 o 20 monedas.
+2. Filtros e interactividad
+- Filtros: criptomoneda, rango de fechas, moneda y top N
+- Actualizacion dinamica al cambiar filtros
+- Tooltips y leyendas en todas las graficas
 
-📌 Métricas Clave (Tarjetas Estadísticas)
+3. Diseno responsivo
+- Layout responsive con grid/flex para desktop/tablet/movil
+- Graficas adaptables con `ResponsiveContainer`
 
-Precio actual con variación porcentual 24h
+4. Calidad de codigo
+- TypeScript + componentes modulares
+- Separacion por responsabilidades (`components/dashboard`, `lib/api`, `lib/utils`)
 
-Capitalización total de mercado
+5. Rendimiento
+- Cache en memoria para requests de API
+- Retry con exponential backoff + timeout en errores transitorios
+- Menos carga de red con React Query + cache
 
-Volumen de trading 24h
+6. Accesibilidad
+- ARIA labels y landmarks semanticos (`header`, `main`, `footer`)
+- Controles navegables por teclado
+- Enlace de salto y resumenes de graficas para lectores de pantalla
 
-Supply circulante y máximo histórico (ATH)
+7. Compatibilidad entre navegadores
+- Smoke test Playwright para Chromium, Firefox y WebKit
 
-✨ Características Adicionales
+8. Pruebas
+- Pruebas unitarias con Vitest + Testing Library
+- Pruebas E2E smoke con Playwright
 
-🌙 Modo oscuro con diseño glassmorphism
+9. Documentacion
+- Este README incluye setup, arquitectura, supuestos, problemas conocidos, pruebas y despliegue
 
-📱 Totalmente responsivo (desktop, tablet y móvil)
+## Stack tecnologico
+- React 18 + TypeScript
+- Vite
+- Recharts
+- TanStack Query
+- Tailwind CSS + shadcn/ui
+- Vitest + Testing Library
+- Playwright
 
-♿ Accesible (atributos ARIA y navegación con teclado)
-
-⚡ Optimizado con caché de API y renderizado eficiente
-
-🔄 Actualización manual de datos
-
-⚠️ Manejo amigable de errores de API
-
-🛠️ Stack Tecnológico
-Tecnología	Propósito
-React 18	Framework de UI
-TypeScript	Tipado estático
-Vite	Herramienta de build y servidor de desarrollo
-Recharts	Librería de gráficas
-shadcn/ui	Sistema de componentes UI
-Tailwind CSS	Estilizado utility-first
-TanStack Query	Fetching y cacheo de datos
-Lucide React	Librería de íconos
-📁 Estructura del Proyecto
+## Estructura del proyecto
+```txt
 src/
-├── components/
-│   └── dashboard/
-│       ├── Filters.tsx
-│       ├── StatCards.tsx
-│       ├── PriceLineChart.tsx
-│       ├── MarketCapBarChart.tsx
-│       └── VolumeDonutChart.tsx
-├── lib/
-│   ├── api.ts
-│   └── utils-dashboard.ts
-├── pages/
-│   └── Index.tsx
-└── index.css
-🚀 Instalación y Ejecución
-Requisitos
+  components/dashboard/
+  lib/
+  pages/
+  test/
+e2e/
+docs/screenshots/
+```
 
-Node.js 18+
+## Instalacion y ejecucion
+Requisitos:
+- Node.js 18+
+- npm 9+ (o pnpm)
 
-pnpm (recomendado) o npm
+Instalar dependencias:
+```bash
+npm install
+```
 
-Instalación
-# Instalar dependencias
-pnpm install
+Ejecutar en local:
+```bash
+npm run dev
+```
 
-# Iniciar entorno de desarrollo
-pnpm run dev
+Build de produccion:
+```bash
+npm run build
+```
 
-# Build de producción
-pnpm run build
+## Variables de entorno
+Copia `.env.example` a `.env` y ajusta si lo necesitas:
 
-# Ejecutar linter
-pnpm run lint
+```bash
+cp .env.example .env
+```
 
-El servidor de desarrollo inicia en:
+Variables disponibles:
+- `VITE_API_CACHE_MS`: tiempo de cache en ms (default `180000`)
+- `VITE_API_TIMEOUT_MS`: timeout por request en ms (default `20000`)
+- `VITE_API_MAX_RETRIES`: reintentos en fallos transitorios (default `3`)
+- `VITE_API_BACKOFF_BASE_MS`: base del backoff en ms (default `600`)
+- `VITE_API_BACKOFF_JITTER_MS`: jitter aleatorio en ms (default `300`)
 
-http://localhost:5173
-🎨 Enfoque de Diseño
-Diseño Visual
+## Pruebas
+Pruebas unitarias:
+```bash
+npm run test:run
+```
 
-Tema oscuro con fondo profundo (#0F1117)
+Cobertura:
+```bash
+npm run test:coverage
+```
 
-Acento principal Indigo (#6366F1)
+Pruebas smoke multi-navegador:
+```bash
+npm run test:e2e -- e2e/dashboard.smoke.spec.ts
+```
 
-Colores verde/rojo para variaciones positivas/negativas
+Generar capturas del README:
+```bash
+npm run screenshots
+```
 
-Efecto glassmorphism en tarjetas
+Validacion completa (lint + unit tests + build):
+```bash
+npm run check
+```
 
-Animaciones suaves en hover
+## Despliegue
+Vercel (recomendado):
+1. Subir repositorio a GitHub.
+2. Importar proyecto en Vercel.
+3. Comando de build: `npm run build`.
+4. Directorio de salida: `dist`.
+5. Cargar variables opcionales desde `.env.example`.
 
-Decisiones de Arquitectura
+Netlify (alternativa):
+- Comando de build: `npm run build`
+- Directorio de publicacion: `dist`
 
-API CoinGecko: Elegida por su plan gratuito sin API Key y buena estabilidad.
+## Notas de accesibilidad
+- Enlace de salto para ir al contenido principal.
+- Labels descriptivos en toolbar y controles.
+- Resumen textual de graficas para lectores de pantalla.
+- Estados de carga/error anunciados con `aria-live`.
 
-Recharts: Enfoque declarativo y fácil integración con React.
+## Supuestos
+- El plan gratis de CoinGecko puede aplicar rate limit.
+- Los datos de mercado no requieren autenticacion para este alcance.
+- El dashboard esta enfocado en top monedas y analisis corto/medio plazo.
 
-TanStack Query: Manejo eficiente de estados de carga, cacheo y reintentos.
+## Problemas conocidos
+- El API gratis puede fallar en picos de trafico global.
+- Las graficas dependen de la disponibilidad del API externo.
+- Falta definir URL final de demo en vivo despues del deploy.
 
-Separación por Componentes: Cada gráfica es independiente para facilitar mantenimiento.
-
-Capa de Caché Personalizada: TTL de 1 minuto para reducir llamadas y respetar rate limits.
-
-📱 Estrategia Responsive
-
-CSS Grid adaptable
-
-Layout fluido para tarjetas (1 columna móvil → 4 columnas desktop)
-
-Gráficas con ResponsiveContainer
-
-Filtros adaptables con flex-wrap
-
-⚠️ Limitaciones Conocidas
-
-La API gratuita de CoinGecko tiene límites de rate.
-
-Los datos se cachean por 1 minuto.
-
-Solo incluye 10 criptomonedas por simplicidad.
-
-Compatible con navegadores modernos.
-
-No incluye autenticación ni persistencia de usuario.
-
-🧪 Testing
-
-Arquitectura modular preparada para testing:
-
-Componentes testeables de forma aislada.
-
-Capa de API mockeable.
-
-Funciones utilitarias puras.
-
-📄 Licencia
-
-MIT License.
-
-🙏 Créditos
-
-Datos: CoinGecko API
-
-Gráficas: Recharts
-
-UI: shadcn/ui
-
-Íconos: Lucide
+## Autor
+GersomBS

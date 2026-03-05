@@ -40,7 +40,7 @@ export default function Filters({ filters, onFilterChange }: FiltersProps) {
     <div
       className="flex flex-wrap items-center gap-3 p-4 rounded-xl bg-[#1A1D2E]/80 backdrop-blur-sm border border-white/5"
       role="toolbar"
-      aria-label="Dashboard filters"
+      aria-label="Filtros del dashboard"
     >
       {/* Coin Selector */}
       <div className="flex flex-col gap-1">
@@ -48,7 +48,7 @@ export default function Filters({ filters, onFilterChange }: FiltersProps) {
           htmlFor="coin-select"
           className="text-xs text-slate-400 font-medium"
         >
-          Cryptocurrency
+          Criptomoneda
         </label>
         <Select
           value={filters.selectedCoin}
@@ -57,9 +57,9 @@ export default function Filters({ filters, onFilterChange }: FiltersProps) {
           <SelectTrigger
             id="coin-select"
             className="w-[180px] bg-[#242842] border-[#2D3154] text-slate-200 focus:ring-indigo-500"
-            aria-label="Select cryptocurrency"
+            aria-label="Seleccionar criptomoneda"
           >
-            <SelectValue placeholder="Select coin" />
+            <SelectValue placeholder="Selecciona moneda" />
           </SelectTrigger>
           <SelectContent className="bg-[#242842] border-[#2D3154]">
             {AVAILABLE_COINS.map((coin) => (
@@ -89,7 +89,7 @@ export default function Filters({ filters, onFilterChange }: FiltersProps) {
           htmlFor="date-range"
           className="text-xs text-slate-400 font-medium"
         >
-          Time Period
+          Periodo
         </label>
         <Select
           value={filters.dateRange}
@@ -98,9 +98,9 @@ export default function Filters({ filters, onFilterChange }: FiltersProps) {
           <SelectTrigger
             id="date-range"
             className="w-[140px] bg-[#242842] border-[#2D3154] text-slate-200 focus:ring-indigo-500"
-            aria-label="Select time period"
+            aria-label="Seleccionar periodo"
           >
-            <SelectValue placeholder="Date range" />
+            <SelectValue placeholder="Rango de fechas" />
           </SelectTrigger>
           <SelectContent className="bg-[#242842] border-[#2D3154]">
             {DATE_RANGES.map((range) => (
@@ -122,7 +122,7 @@ export default function Filters({ filters, onFilterChange }: FiltersProps) {
           htmlFor="currency-select"
           className="text-xs text-slate-400 font-medium"
         >
-          Currency
+          Moneda
         </label>
         <Select
           value={filters.currency}
@@ -131,9 +131,9 @@ export default function Filters({ filters, onFilterChange }: FiltersProps) {
           <SelectTrigger
             id="currency-select"
             className="w-[130px] bg-[#242842] border-[#2D3154] text-slate-200 focus:ring-indigo-500"
-            aria-label="Select currency"
+            aria-label="Seleccionar moneda"
           >
-            <SelectValue placeholder="Currency" />
+            <SelectValue placeholder="Moneda" />
           </SelectTrigger>
           <SelectContent className="bg-[#242842] border-[#2D3154]">
             {CURRENCIES.map((curr) => (
@@ -150,11 +150,11 @@ export default function Filters({ filters, onFilterChange }: FiltersProps) {
       </div>
 
       {/* Top N Coins */}
-      <div className="flex flex-col gap-1">
-        <label className="text-xs text-slate-400 font-medium">
-          Show Top Coins
-        </label>
-        <div className="flex gap-1" role="radiogroup" aria-label="Number of coins to display">
+      <fieldset className="flex flex-col gap-1">
+        <legend className="text-xs text-slate-400 font-medium">
+          Mostrar top monedas
+        </legend>
+        <div className="flex gap-1" aria-label="Cantidad de monedas a mostrar">
           {[5, 10, 20].map((n) => (
             <Button
               key={n}
@@ -166,15 +166,14 @@ export default function Filters({ filters, onFilterChange }: FiltersProps) {
                   ? 'bg-indigo-600 hover:bg-indigo-700 text-white border-indigo-600'
                   : 'bg-transparent border-[#2D3154] text-slate-400 hover:bg-[#242842] hover:text-slate-200'
               }
-              role="radio"
-              aria-checked={filters.topN === n}
-              aria-label={`Show top ${n} coins`}
+              aria-pressed={filters.topN === n}
+              aria-label={`Mostrar top ${n} monedas`}
             >
               {n}
             </Button>
           ))}
         </div>
-      </div>
+      </fieldset>
     </div>
   );
 }

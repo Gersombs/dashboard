@@ -1,14 +1,3 @@
-/**
- * Dashboard utility functions for formatting currencies, numbers, dates,
- * and other data transformations used across the crypto dashboard.
- */
-
-/**
- * Format a number as currency with appropriate symbol
- * @param value - The numeric value to format
- * @param currency - Currency code (usd, eur, gbp)
- * @param compact - Whether to use compact notation for large numbers
- */
 export function formatCurrency(
   value: number,
   currency: string = 'usd',
@@ -16,8 +5,8 @@ export function formatCurrency(
 ): string {
   const symbols: Record<string, string> = {
     usd: '$',
-    eur: '€',
-    gbp: '£',
+    eur: '\u20AC',
+    gbp: '\u00A3',
   };
 
   const symbol = symbols[currency.toLowerCase()] || '$';
@@ -33,23 +22,19 @@ export function formatCurrency(
   }
 
   if (value >= 1) {
-    return `${symbol}${value.toLocaleString('en-US', {
+    return `${symbol}${value.toLocaleString('es-MX', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`;
   }
 
-  // For very small values (e.g., some altcoins)
-  return `${symbol}${value.toLocaleString('en-US', {
+  // Para valores muy pequenos (altcoins).
+  return `${symbol}${value.toLocaleString('es-MX', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 6,
   })}`;
 }
 
-/**
- * Format a large number with compact notation
- * @param value - The numeric value
- */
 export function formatNumber(value: number): string {
   if (Math.abs(value) >= 1e12) {
     return `${(value / 1e12).toFixed(2)}T`;
@@ -66,32 +51,23 @@ export function formatNumber(value: number): string {
   return value.toFixed(2);
 }
 
-/**
- * Format a percentage value with + or - sign
- * @param value - The percentage value
- */
 export function formatPercentage(value: number): string {
   const sign = value >= 0 ? '+' : '';
   return `${sign}${value.toFixed(2)}%`;
 }
 
-/**
- * Format a Unix timestamp to a readable date string
- * @param timestamp - Unix timestamp in milliseconds
- * @param format - 'short' for MM/DD, 'long' for full date
- */
 export function formatDate(
   timestamp: number,
   format: 'short' | 'long' = 'short'
 ): string {
   const date = new Date(timestamp);
   if (format === 'short') {
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString('es-MX', {
       month: 'short',
       day: 'numeric',
     });
   }
-  return date.toLocaleDateString('en-US', {
+  return date.toLocaleDateString('es-MX', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -100,33 +76,23 @@ export function formatDate(
   });
 }
 
-/**
- * Get color based on positive/negative value
- * @param value - The numeric value
- */
 export function getChangeColor(value: number): string {
   return value >= 0 ? '#10B981' : '#EF4444';
 }
 
-/**
- * Chart color palette for consistent styling
- */
 export const CHART_COLORS = [
-  '#6366F1', // Indigo
-  '#22D3EE', // Cyan
-  '#F59E0B', // Amber
-  '#10B981', // Emerald
-  '#EF4444', // Red
-  '#8B5CF6', // Violet
-  '#EC4899', // Pink
-  '#F97316', // Orange
-  '#14B8A6', // Teal
-  '#84CC16', // Lime
+  '#6366F1',
+  '#22D3EE',
+  '#F59E0B',
+  '#10B981',
+  '#EF4444',
+  '#8B5CF6',
+  '#EC4899',
+  '#F97316',
+  '#14B8A6',
+  '#84CC16',
 ];
 
-/**
- * Available cryptocurrencies for the dashboard
- */
 export const AVAILABLE_COINS = [
   { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC' },
   { id: 'ethereum', name: 'Ethereum', symbol: 'ETH' },
@@ -138,23 +104,17 @@ export const AVAILABLE_COINS = [
   { id: 'dogecoin', name: 'Dogecoin', symbol: 'DOGE' },
   { id: 'polkadot', name: 'Polkadot', symbol: 'DOT' },
   { id: 'avalanche-2', name: 'Avalanche', symbol: 'AVAX' },
-];
+] as const;
 
-/**
- * Date range options for price history
- */
 export const DATE_RANGES = [
-  { value: '7', label: '7 Days' },
-  { value: '30', label: '30 Days' },
-  { value: '90', label: '90 Days' },
-  { value: '365', label: '1 Year' },
-];
+  { value: '7', label: '7 dias' },
+  { value: '30', label: '30 dias' },
+  { value: '90', label: '90 dias' },
+  { value: '365', label: '1 ano' },
+] as const;
 
-/**
- * Currency options
- */
 export const CURRENCIES = [
   { value: 'usd', label: 'USD ($)' },
-  { value: 'eur', label: 'EUR (€)' },
-  { value: 'gbp', label: 'GBP (£)' },
-];
+  { value: 'eur', label: 'EUR (\u20AC)' },
+  { value: 'gbp', label: 'GBP (\u00A3)' },
+] as const;
