@@ -1,9 +1,3 @@
-/**
- * Filters component for the crypto dashboard.
- * Provides controls for selecting cryptocurrencies, date range,
- * currency, and number of coins to display.
- */
-
 import {
   Select,
   SelectContent,

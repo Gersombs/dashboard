@@ -1,8 +1,3 @@
-/**
- * PriceLineChart component displaying price history over time.
- * Uses Recharts LineChart with tooltips, legend, and responsive container.
- */
-
 import {
   LineChart,
   Line,

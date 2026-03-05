@@ -1,8 +1,3 @@
-/**
- * MarketCapBarChart component displaying market capitalization comparison
- * for top cryptocurrencies using a horizontal bar chart.
- */
-
 import {
   BarChart,
   Bar,

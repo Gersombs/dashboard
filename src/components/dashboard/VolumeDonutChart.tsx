@@ -1,8 +1,3 @@
-/**
- * VolumeDonutChart component displaying trading volume distribution
- * among top cryptocurrencies using a pie/donut chart.
- */
-
 import {
   PieChart,
   Pie,
@@ -21,9 +16,6 @@ interface VolumeDonutChartProps {
   isLoading: boolean;
 }
 
-/**
- * Custom tooltip for the donut chart
- */
 function CustomTooltip({
   active,
   payload,
@@ -65,9 +57,6 @@ function CustomTooltip({
   );
 }
 
-/**
- * Custom legend renderer
- */
 function renderLegend(props: {
   payload?: Array<{ value: string; color: string }>;
 }) {

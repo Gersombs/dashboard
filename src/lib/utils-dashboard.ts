@@ -107,10 +107,10 @@ export const AVAILABLE_COINS = [
 ] as const;
 
 export const DATE_RANGES = [
-  { value: '7', label: '7 dias' },
-  { value: '30', label: '30 dias' },
-  { value: '90', label: '90 dias' },
-  { value: '365', label: '1 ano' },
+  { value: '7', label: '7 días' },
+  { value: '30', label: '30 días' },
+  { value: '90', label: '90 días' },
+  { value: '365', label: '1 año' },
 ] as const;
 
 export const CURRENCIES = [

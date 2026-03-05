@@ -1,8 +1,3 @@
-/**
- * StatCards component displaying key metrics for the selected cryptocurrency.
- * Shows current price, 24h change, market cap, and trading volume.
- */
-
 import { TrendingUp, TrendingDown, DollarSign, BarChart3, Activity, Coins } from 'lucide-react';
 import type { CoinMarketData } from '@/lib/api';
 import {
